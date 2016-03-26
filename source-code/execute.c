@@ -14,27 +14,27 @@
 
 #include "global.h"
 #define DEBUG
-int goon = 0, ingnore = 0;       //用于设置signal信号量
-char *envPath[10], cmdBuff[40];  //外部命令的存放路径及读取外部命令的缓冲空间
-History history;                 //历史命令
-Job *head = NULL;                //作业头指针
-pid_t fgPid;                     //当前前台作业的进程号
+int goon = 0, ingnore = 0;       //脫脙脫脷脡猫脰脙signal脨脜潞脜脕驴
+char *envPath[10], cmdBuff[40];  //脥芒虏驴脙眉脕卯碌脛麓忙路脜脗路戮露录掳露脕脠隆脥芒虏驴脙眉脕卯碌脛禄潞鲁氓驴脮录盲
+History history;                 //脌煤脢路脙眉脕卯
+Job *head = NULL;                //脳梅脪碌脥路脰赂脮毛
+pid_t fgPid;                     //碌卤脟掳脟掳脤篓脳梅脪碌碌脛陆酶鲁脤潞脜
 
 /*******************************************************
-                  工具以及辅助方法
+                  鹿陇戮脽脪脭录掳赂篓脰煤路陆路篓
 ********************************************************/
-/*判断命令是否存在*/
+/*脜脨露脧脙眉脕卯脢脟路帽麓忙脭脷*/
 int exists(char *cmdFile){
     int i = 0;
-    if((cmdFile[0] == '/' || cmdFile[0] == '.') && access(cmdFile, F_OK) == 0){ //命令在当前目录
+    if((cmdFile[0] == '/' || cmdFile[0] == '.') && access(cmdFile, F_OK) == 0){ //脙眉脕卯脭脷碌卤脟掳脛驴脗录
         strcpy(cmdBuff, cmdFile);
         return 1;
-    }else{  //查找ysh.conf文件中指定的目录，确定命令是否存在
-        while(envPath[i] != NULL){ //查找路径已在初始化时设置在envPath[i]中
+    }else{  //虏茅脮脪ysh.conf脦脛录镁脰脨脰赂露篓碌脛脛驴脗录拢卢脠路露篓脙眉脕卯脢脟路帽麓忙脭脷
+        while(envPath[i] != NULL){ //虏茅脮脪脗路戮露脪脩脭脷鲁玫脢录禄炉脢卤脡猫脰脙脭脷envPath[i]脰脨
             strcpy(cmdBuff, envPath[i]);
             strcat(cmdBuff, cmdFile);
             
-            if(access(cmdBuff, F_OK) == 0){ //命令文件被找到
+            if(access(cmdBuff, F_OK) == 0){ //脙眉脕卯脦脛录镁卤禄脮脪碌陆
                 return 1;
             }
             
@@ -45,7 +45,7 @@ int exists(char *cmdFile){
     return 0; 
 }
 
-/*将字符串转换为整型的Pid*/
+/*陆芦脳脰路没麓庐脳陋禄禄脦陋脮没脨脥碌脛Pid*/
 int str2Pid(char *str, int start, int end){
     int i, j;
     char chs[20];
@@ -62,7 +62,7 @@ int str2Pid(char *str, int start, int end){
     return atoi(chs);
 }
 
-/*调整部分外部命令的格式*/
+/*碌梅脮没虏驴路脰脥芒虏驴脙眉脕卯碌脛赂帽脢陆*/
 void justArgs(char *str){
     int i, j, len;
     len = strlen(str);
@@ -73,7 +73,7 @@ void justArgs(char *str){
         }
     }
 
-    if(j != -1){ //找到符号'/'
+    if(j != -1){ //脮脪碌陆路没潞脜'/'
         for(i = 0, j++; j < len; i++, j++){
             str[i] = str[j];
         }
@@ -81,12 +81,12 @@ void justArgs(char *str){
     }
 }
 
-/*设置goon*/
+/*脡猫脰脙goon*/
 void setGoon(){
     goon = 1;
 }
 
-/*释放环境变量空间*/
+/*脢脥路脜禄路戮鲁卤盲脕驴驴脮录盲*/
 void release(){
     int i;
     for(i = 0; strlen(envPath[i]) > 0; i++){
@@ -95,21 +95,21 @@ void release(){
 }
 
 /*******************************************************
-                  信号以及jobs相关
+                  脨脜潞脜脪脭录掳jobs脧脿鹿脴
 ********************************************************/
-/*添加新的作业*/
+/*脤铆录脫脨脗碌脛脳梅脪碌*/
 Job* addJob(pid_t pid){
     Job *now = NULL, *last = NULL, *job = (Job*)malloc(sizeof(Job));
     
-	//初始化新的job
+	//鲁玫脢录禄炉脨脗碌脛job
     job->pid = pid;
     strcpy(job->cmd, inputBuff);
     strcpy(job->state, RUNNING);
     job->next = NULL;
     
-    if(head == NULL){ //若是第一个job，则设置为头指针
+    if(head == NULL){ //脠么脢脟碌脷脪禄赂枚job拢卢脭貌脡猫脰脙脦陋脥路脰赂脮毛
         head = job;
-    }else{ //否则，根据pid将新的job插入到链表的合适位置
+    }else{ //路帽脭貌拢卢赂霉戮脻pid陆芦脨脗碌脛job虏氓脠毛碌陆脕麓卤铆碌脛潞脧脢脢脦禄脰脙
 		now = head;
 		while(now != NULL && now->pid < pid){
 			last = now;
@@ -122,7 +122,7 @@ Job* addJob(pid_t pid){
     return job;
 }
 
-/*移除一个作业*/
+/*脪脝鲁媒脪禄赂枚脳梅脪碌*/
 void rmJob(int sig, siginfo_t *sip, void* noused){
     pid_t pid;
     Job *now = NULL, *last = NULL;
@@ -131,6 +131,8 @@ void rmJob(int sig, siginfo_t *sip, void* noused){
         ingnore = 0;
         return;
     }
+    if(getpid() == fgPid)
+        fgPid = 0;
     
     pid = sip->si_pid;
 
@@ -140,11 +142,11 @@ void rmJob(int sig, siginfo_t *sip, void* noused){
 		now = now->next;
 	}
     
-    if(now == NULL){ //作业不存在，则不进行处理直接返回
+    if(now == NULL){ //脳梅脪碌虏禄麓忙脭脷拢卢脭貌虏禄陆酶脨脨麓娄脌铆脰卤陆脫路碌禄脴
         return;
     }
     
-	//开始移除该作业
+	//驴陋脢录脪脝鲁媒赂脙脳梅脪碌
     if(now == head){
         head = now->next;
     }else{
@@ -154,120 +156,164 @@ void rmJob(int sig, siginfo_t *sip, void* noused){
     free(now);
 }
 
-/*组合键命令ctrl+z*/
+/*脳茅潞脧录眉脙眉脕卯ctrl+z*/
 void ctrl_Z(){
     Job *now = NULL;
     
-    if(fgPid == 0){ //前台没有作业则直接返回
+    if(fgPid == 0){ //脟掳脤篓脙禄脫脨脳梅脪碌脭貌脰卤陆脫路碌禄脴
         return;
     }
     
-    //SIGCHLD信号产生自ctrl+z
+    //SIGCHLD脨脜潞脜虏煤脡煤脳脭ctrl+z
     ingnore = 1;
     
 	now = head;
+    //printf("%d\n",head);
 	while(now != NULL && now->pid != fgPid)
-		now = now->next;
+		{
+            //printf("%d",now->pid);
+            now = now->next;
+        }
     
-    if(now == NULL){ //未找到前台作业，则根据fgPid添加前台作业
+    if(now == NULL){ //脦麓脮脪碌陆脟掳脤篓脳梅脪碌拢卢脭貌赂霉戮脻fgPid脤铆录脫脟掳脤篓脳梅脪碌
         now = addJob(fgPid);
     }
     
-	//修改前台作业的状态及相应的命令格式，并打印提示信息
+	//脨脼赂脛脟掳脤篓脳梅脪碌碌脛脳麓脤卢录掳脧脿脫娄碌脛脙眉脕卯赂帽脢陆拢卢虏垄麓貌脫隆脤谩脢戮脨脜脧垄
     strcpy(now->state, STOPPED); 
     now->cmd[strlen(now->cmd)] = '&';
-    now->cmd[strlen(now->cmd) + 1] = '\0';
+    now->cmd[strlen(now->cmd)+1] = '\0';
     printf("[%d]\t%s\t\t%s\n", now->pid, now->state, now->cmd);
     
-	//发送SIGSTOP信号给正在前台运作的工作，将其停止
+	//路垄脣脥SIGSTOP脨脜潞脜赂酶脮媒脭脷脟掳脤篓脭脣脳梅碌脛鹿陇脳梅拢卢陆芦脝盲脥拢脰鹿
     kill(fgPid, SIGSTOP);
     fgPid = 0;
 }
+void ctrl_C(){
+    if(fgPid != 0)
+        kill(fgPid,SIGINT);
+}
 
-/*fg命令*/
+/*fg脙眉脕卯*/
 void fg_exec(int pid){    
     Job *now = NULL; 
-	int i;
-    
-    //SIGCHLD信号产生自此函数
+    Job *job = NULL;
+    Job *last = NULL;
+    job = (Job*)malloc(sizeof(Job));
+	int i,flag=0;
+    printf("%d\n",head);
+    //SIGCHLD脨脜潞脜虏煤脡煤脳脭麓脣潞炉脢媒
     ingnore = 1;
     
-	//根据pid查找作业
+	//赂霉戮脻pid虏茅脮脪脳梅脪碌
     now = head;
 	while(now != NULL && now->pid != pid)
-		now = now->next;
-    
-    if(now == NULL){ //未找到作业
-        printf("pid为7%d 的作业不存在！\n", pid);
+		{
+            last = now;
+            now = now->next;
+        }
+    if(head == now)
+    {
+        flag = 1;
+    }
+    if(now == NULL){ //脦麓脮脪碌陆脳梅脪碌
+        printf("pid脦陋7%d 碌脛脳梅脪碌虏禄麓忙脭脷拢隆\n", pid);
         return;
     }
-
-    //记录前台作业的pid，修改对应作业状态
+    
+    //录脟脗录脟掳脤篓脳梅脪碌碌脛pid拢卢脨脼赂脛露脭脫娄脳梅脪碌脳麓脤卢
     fgPid = now->pid;
     strcpy(now->state, RUNNING);
     
-    signal(SIGTSTP, ctrl_Z); //设置signal信号，为下一次按下组合键Ctrl+Z做准备
+    //signal(SIGTSTP, ctrl_Z); //脡猫脰脙signal脨脜潞脜拢卢脦陋脧脗脪禄麓脦掳麓脧脗脳茅潞脧录眉Ctrl+Z脳枚脳录卤赂
     i = strlen(now->cmd) - 1;
     while(i >= 0 && now->cmd[i] != '&')
 		i--;
     now->cmd[i] = '\0';
-    
+
+    job->pid =  now -> pid;
+    strcpy(job->cmd, now -> cmd);
+    strcpy(job->state, now ->state);
+    job->next = now -> next;
+
     printf("%s\n", now->cmd);
-    kill(now->pid, SIGCONT); //向对象作业发送SIGCONT信号，使其运行
-    waitpid(fgPid, NULL, 0); //父进程等待前台进程的运行
+    tcsetpgrp(STDIN_FILENO,pid);
+    kill(now->pid, SIGCONT); 
+    sleep(1);
+    int status = 0;
+    fgPid = pid;
+    ////printf("111111\n");
+    waitpid(pid, &status,WUNTRACED);
+    tcsetpgrp(STDIN_FILENO,getpid());
+    ///printf("2222222");
+    //printf("%d!!!%d$$$",head,now);
+    if(status == 5247)
+        {
+            now = job;
+            if(flag  == 1)
+            {
+                head = now;
+            }
+            else
+                last ->next  = now;
+            ctrl_Z();
+        }
+    else if(status == 2)
+        ctrl_C();
+
 }
 
-/*bg命令*/
+/*bg脙眉脕卯*/
 void bg_exec(int pid){
     Job *now = NULL;
     
-    //SIGCHLD信号产生自此函数
+    //SIGCHLD脨脜潞脜虏煤脡煤脳脭麓脣潞炉脢媒
     ingnore = 1;
     
-	//根据pid查找作业
+	//赂霉戮脻pid虏茅脮脪脳梅脪碌
 	now = head;
     while(now != NULL && now->pid != pid)
 		now = now->next;
     
-    if(now == NULL){ //未找到作业
-        printf("pid为7%d 的作业不存在！\n", pid);
+    if(now == NULL){ //脦麓脮脪碌陆脳梅脪碌
+        printf("pid脦陋7%d 碌脛脳梅脪碌虏禄麓忙脭脷拢隆\n", pid);
         return;
     }
     
-    strcpy(now->state, RUNNING); //修改对象作业的状态
+    strcpy(now->state, RUNNING); //脨脼赂脛露脭脧贸脳梅脪碌碌脛脳麓脤卢
     printf("[%d]\t%s\t\t%s\n", now->pid, now->state, now->cmd);
     
-    kill(now->pid, SIGCONT); //向对象作业发送SIGCONT信号，使其运行
+    kill(now->pid, SIGCONT); //脧貌露脭脧贸脳梅脪碌路垄脣脥SIGCONT脨脜潞脜拢卢脢鹿脝盲脭脣脨脨
 }
 
 /*******************************************************
-                    命令历史记录
+                    脙眉脕卯脌煤脢路录脟脗录
 ********************************************************/
 void addHistory(char *cmd){
-    if(history.end == -1){ //第一次使用history命令
+    if(history.end == -1){ //碌脷脪禄麓脦脢鹿脫脙history脙眉脕卯
         history.end = 0;
         strcpy(history.cmds[history.end], cmd);
         return;
 	}
     
-    history.end = (history.end + 1)%HISTORY_LEN; //end前移一位
-    strcpy(history.cmds[history.end], cmd); //将命令拷贝到end指向的数组中
+    history.end = (history.end + 1)%HISTORY_LEN; //end脟掳脪脝脪禄脦禄
+    strcpy(history.cmds[history.end], cmd); //陆芦脙眉脕卯驴陆卤麓碌陆end脰赂脧貌碌脛脢媒脳茅脰脨
     
-    if(history.end == history.start){ //end和start指向同一位置
-        history.start = (history.start + 1)%HISTORY_LEN; //start前移一位
+    if(history.end == history.start){ //end潞脥start脰赂脧貌脥卢脪禄脦禄脰脙
+        history.start = (history.start + 1)%HISTORY_LEN; //start脟掳脪脝脪禄脦禄
     }
 }
 
 /*******************************************************
-                     初始化环境
+                     鲁玫脢录禄炉禄路戮鲁
 ********************************************************/
-/*通过路径文件获取环境路径*/
+/*脥篓鹿媒脗路戮露脦脛录镁禄帽脠隆禄路戮鲁脗路戮露*/
 void getEnvPath(int len, char *buf){
     int i, j, last = 0, pathIndex = 0, temp;
     char path[40];
     
     for(i = 0, j = 0; i < len; i++){
-        if(buf[i] == ':'){ //将以冒号(:)分隔的查找路径分别设置到envPath[]中
+        if(buf[i] == ':'){ //陆芦脪脭脙掳潞脜(:)路脰赂么碌脛虏茅脮脪脗路戮露路脰卤冒脡猫脰脙碌陆envPath[]脰脨
             if(path[j-1] != '/'){
                 path[j++] = '/';
             }
@@ -287,54 +333,55 @@ void getEnvPath(int len, char *buf){
     envPath[pathIndex] = NULL;
 }
 
-/*初始化操作*/
+/*鲁玫脢录禄炉虏脵脳梅*/
 void init(){
     int fd, n, len;
     char c, buf[80];
 
-	//打开查找路径文件ysh.conf
+	//麓貌驴陋虏茅脮脪脗路戮露脦脛录镁ysh.conf
     if((fd = open("ysh.conf", O_RDONLY, 660)) == -1){
         perror("init environment failed\n");
         exit(1);
     }
     
-	//初始化history链表
+	//鲁玫脢录禄炉history脕麓卤铆
     history.end = -1;
     history.start = 0;
     
     len = 0;
-	//将路径文件内容依次读入到buf[]中
+	//陆芦脗路戮露脦脛录镁脛脷脠脻脪脌麓脦露脕脠毛碌陆buf[]脰脨
     while(read(fd, &c, 1) != 0){ 
         buf[len++] = c;
     }
     buf[len] = '\0';
 
-    //将环境路径存入envPath[]
+    //陆芦禄路戮鲁脗路戮露麓忙脠毛envPath[]
     getEnvPath(len, buf); 
     
-    //注册信号
+    //脳垄虏谩脨脜潞脜
     struct sigaction action;
     action.sa_sigaction = rmJob;
     sigfillset(&action.sa_mask);
     action.sa_flags = SA_SIGINFO;
     sigaction(SIGCHLD, &action, NULL);
     signal(SIGTSTP, ctrl_Z);
+    signal(SIGINT,ctrl_C);
 }
 
 /*******************************************************
-                      命令解析
+                      脙眉脕卯陆芒脦枚
 ********************************************************/
 SimpleCmd* handleSimpleCmdStr(int begin, int end){
     int i, j, k;
-    int fileFinished; //记录命令是否解析完毕
+    int fileFinished; //录脟脗录脙眉脕卯脢脟路帽陆芒脦枚脥锚卤脧
     char c, buff[10][40], inputFile[30], outputFile[30], *temp = NULL;
     SimpleCmd *cmd = (SimpleCmd*)malloc(sizeof(SimpleCmd));
     
-	//默认为非后台命令，输入输出重定向为null
+	//脛卢脠脧脦陋路脟潞贸脤篓脙眉脕卯拢卢脢盲脠毛脢盲鲁枚脰脴露篓脧貌脦陋null
     cmd->isBack = 0;
     cmd->input = cmd->output = NULL;
     
-    //初始化相应变量
+    //鲁玫脢录禄炉脧脿脫娄卤盲脕驴
     for(i = begin; i<10; i++){
         buff[i][0] = '\0';
     }
@@ -342,7 +389,7 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
     outputFile[0] = '\0';
     
     i = begin;
-	//跳过空格等无用信息
+	//脤酶鹿媒驴脮赂帽碌脠脦脼脫脙脨脜脧垄
     while(i < end && (inputBuff[i] == ' ' || inputBuff[i] == '\t')){
         i++;
     }
@@ -350,12 +397,12 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
     k = 0;
     j = 0;
     fileFinished = 0;
-    temp = buff[k]; //以下通过temp指针的移动实现对buff[i]的顺次赋值过程
+    temp = buff[k]; //脪脭脧脗脥篓鹿媒temp脰赂脮毛碌脛脪脝露炉脢碌脧脰露脭buff[i]碌脛脣鲁麓脦赂鲁脰碌鹿媒鲁脤
     while(i < end){
-		/*根据命令字符的不同情况进行不同的处理*/
+		/*赂霉戮脻脙眉脕卯脳脰路没碌脛虏禄脥卢脟茅驴枚陆酶脨脨虏禄脥卢碌脛麓娄脌铆*/
         switch(inputBuff[i]){ 
             case ' ':
-            case '\t': //命令名及参数的结束标志
+            case '\t': //脙眉脕卯脙没录掳虏脦脢媒碌脛陆谩脢酶卤锚脰戮
                 temp[j] = '\0';
                 j = 0;
                 if(!fileFinished){
@@ -364,9 +411,26 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
                 }
                 break;
 
-            case '<': //输入重定向标志
+
+            case '|': //脢盲脠毛脰脴露篓脧貌卤锚脰戮
                 if(j != 0){
-		    //此判断为防止命令直接挨着<符号导致判断为同一个参数，如果ls<sth
+            //麓脣脜脨露脧脦陋路脌脰鹿脙眉脕卯脰卤陆脫掳陇脳脜<路没潞脜碌录脰脗脜脨露脧脦陋脥卢脪禄赂枚虏脦脢媒拢卢脠莽鹿没ls<sth
+                    temp[j] = '\0';
+                    j = 0;
+                    if(!fileFinished){
+                        k++;
+                        temp = buff[k];
+                    }
+                }
+                cmd->pipe=1;
+                fileFinished = 1;
+                i++;
+                cmd->index=i;
+                break;
+
+            case '<': //脢盲脠毛脰脴露篓脧貌卤锚脰戮
+                if(j != 0){
+		    //麓脣脜脨露脧脦陋路脌脰鹿脙眉脕卯脰戮卤陆脫掳陇脳脜<路没潞脜碌录脰脗脜脨露脧脦陋脥卢脪禄赂枚虏脦脢媒拢卢脠莽鹿没ls<sth
                     temp[j] = '\0';
                     j = 0;
                     if(!fileFinished){
@@ -379,7 +443,7 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
                 i++;
                 break;
                 
-            case '>': //输出重定向标志
+            case '>': //脢盲鲁枚脰脴露篓脧貌卤锚脰戮
                 if(j != 0){
                     temp[j] = '\0';
                     j = 0;
@@ -393,7 +457,7 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
                 i++;
                 break;
                 
-            case '&': //后台运行标志
+            case '&': //潞贸脤篓脭脣脨脨卤锚脰戮
                 if(j != 0){
                     temp[j] = '\0';
                     j = 0;
@@ -407,15 +471,17 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
                 i++;
                 break;
                 
-            default: //默认则读入到temp指定的空间
+            default: //脛卢脠脧脭貌露脕脠毛碌陆temp脰赂露篓碌脛驴脮录盲
                 temp[j++] = inputBuff[i++];
                 continue;
 		}
         
-		//跳过空格等无用信息
+		//脤酶鹿媒驴脮赂帽碌脠脦脼脫脙脨脜脧垄
         while(i < end && (inputBuff[i] == ' ' || inputBuff[i] == '\t')){
             i++;
         }
+        if(cmd->pipe == 1)
+            break;
 	}
     
     if(inputBuff[end-1] != ' ' && inputBuff[end-1] != '\t' && inputBuff[end-1] != '&'){
@@ -425,7 +491,7 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
         }
     }
     
-	//依次为命令名及其各个参数赋值
+	//脪脌麓脦脦陋脙眉脕卯脙没录掳脝盲赂梅赂枚虏脦脢媒赂鲁脰碌
     cmd->args = (char**)malloc(sizeof(char*) * (k + 1));
     cmd->args[k] = NULL;
     for(i = 0; i<k; i++){
@@ -434,14 +500,14 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
         strcpy(cmd->args[i], buff[i]);
     }
     
-	//如果有输入重定向文件，则为命令的输入重定向变量赋值
+	//脠莽鹿没脫脨脢盲脠毛脰脴露篓脧貌脦脛录镁拢卢脭貌脦陋脙眉脕卯碌脛脢盲脠毛脰脴露篓脧貌卤盲脕驴赂鲁脰碌
     if(strlen(inputFile) != 0){
         j = strlen(inputFile);
         cmd->input = (char*)malloc(sizeof(char) * (j + 1));
         strcpy(cmd->input, inputFile);
     }
 
-    //如果有输出重定向文件，则为命令的输出重定向变量赋值
+    //脠莽鹿没脫脨脢盲鲁枚脰脴露篓脧貌脦脛录镁拢卢脭貌脦陋脙眉脕卯碌脛脢盲鲁枚脰脴露篓脧貌卤盲脕驴赂鲁脰碌
     if(strlen(outputFile) != 0){
         j = strlen(outputFile);
         cmd->output = (char*)malloc(sizeof(char) * (j + 1));   
@@ -461,89 +527,195 @@ SimpleCmd* handleSimpleCmdStr(int begin, int end){
 }
 
 /*******************************************************
-                      命令执行
+                      脙眉脕卯脰麓脨脨
 ********************************************************/
-/*执行外部命令*/
+/*脰麓脨脨脥芒虏驴脙眉脕卯*/
 void execOuterCmd(SimpleCmd *cmd){
     pid_t pid;
     int pipeIn, pipeOut;
     
-    if(exists(cmd->args[0])){ //命令存在
+    if(exists(cmd->args[0])){ //脙眉脕卯麓忙脭脷
 
         if((pid = fork()) < 0){
             perror("fork failed");
             return;
         }
         
-        if(pid == 0){ //子进程
-            if(cmd->input != NULL){ //存在输入重定向
+        if(pid == 0){ //脳脫陆酶鲁脤
+            setpgid(0,0);
+            if(cmd->input != NULL){ //麓忙脭脷脢盲脠毛脰脴露篓脧貌
                 if((pipeIn = open(cmd->input, O_RDONLY, S_IRUSR|S_IWUSR)) == -1){
-                    printf("不能打开文件 %s！\n", cmd->input);
+                    printf("虏禄脛脺麓貌驴陋脦脛录镁 %s拢隆\n", cmd->input);
                     return;
                 }
                 if(dup2(pipeIn, 0) == -1){
-                    printf("重定向标准输入错误！\n");
+                    printf("脰脴露篓脧貌卤锚脳录脢盲脠毛麓铆脦贸拢隆\n");
                     return;
                 }
             }
             
-            if(cmd->output != NULL){ //存在输出重定向
+            if(cmd->output != NULL){ //麓忙脭脷脢盲鲁枚脰脴露篓脧貌
                 if((pipeOut = open(cmd->output, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) == -1){
-                    printf("不能打开文件 %s！\n", cmd->output);
+                    printf("虏禄脛脺麓貌驴陋脦脛录镁 %s拢隆\n", cmd->output);
                     return ;
                 }
                 if(dup2(pipeOut, 1) == -1){
-                    printf("重定向标准输出错误！\n");
+                    printf("脰脴露篓脧貌卤锚脳录脢盲鲁枚麓铆脦贸拢隆\n");
                     return;
                 }
             }
             
-            if(cmd->isBack){ //若是后台运行命令，等待父进程增加作业
-                signal(SIGUSR1, setGoon); //收到信号，setGoon函数将goon置1，以跳出下面的循环
-                while(goon == 0) ; //等待父进程SIGUSR1信号，表示作业已加到链表中
-                goon = 0; //置0，为下一命令做准备
+            if(cmd->isBack){ //脠么脢脟潞贸脤篓脭脣脨脨脙眉脕卯拢卢碌脠麓媒赂赂陆酶鲁脤脭枚录脫脳梅脪碌
+                signal(SIGUSR1, setGoon); //脢脮碌陆脨脜潞脜拢卢setGoon潞炉脢媒陆芦goon脰脙1拢卢脪脭脤酶鲁枚脧脗脙忙碌脛脩颅禄路
+                while(goon == 0) ; //碌脠麓媒赂赂陆酶鲁脤SIGUSR1脨脜潞脜拢卢卤铆脢戮脳梅脪碌脪脩录脫碌陆脕麓卤铆脰脨
+                goon = 0; //脰脙0拢卢脦陋脧脗脪禄脙眉脕卯脳枚脳录卤赂
                 
                 printf("[%d]\t%s\t\t%s\n", getpid(), RUNNING, inputBuff);
                 kill(getppid(), SIGUSR1);
             }
             
             justArgs(cmd->args[0]);
-            if(execv(cmdBuff, cmd->args) < 0){ //执行命令
+            if(execv(cmdBuff, cmd->args) < 0){ //脰麓脨脨脙眉脕卯
                 printf("execv failed!\n");
                 return;
             }
         }
-		else{ //父进程
-            if(cmd ->isBack){ //后台命令             
-                fgPid = 0; //pid置0，为下一命令做准备
-                addJob(pid); //增加新的作业
-                kill(pid, SIGUSR1); //子进程发信号，表示作业已加入
-                
-                //等待子进程输出
+		else{ //赂赂陆酶鲁脤
+            setpgid(pid,0);
+            if(cmd ->isBack){ //潞贸脤篓脙眉脕卯             
+                fgPid = 0; //pid脰脙0拢卢脦陋脧脗脪禄脙眉脕卯脳枚脳录卤赂
+                addJob(pid); //脭枚录脫脨脗碌脛脳梅脪碌
+                sleep(1);
+                kill(pid, SIGUSR1); //脳脫陆酶鲁脤路垄脨脜潞脜拢卢卤铆脢戮脳梅脪碌脪脩录脫脠毛
+                signal(SIGTTOU, SIG_IGN);
+                //碌脠麓媒脳脫陆酶鲁脤脢盲鲁枚
                 signal(SIGUSR1, setGoon);
                 while(goon == 0) ;
                 goon = 0;
-            }else{ //非后台命令
+            }else{ //路脟潞贸脤篓脙眉脕卯
+                int status =1;
+                //signal(SIGTTIN, SIG_IGN);
+                signal(SIGTTOU, SIG_IGN);
+                tcsetpgrp(STDIN_FILENO,pid) ;
                 fgPid = pid;
-                waitpid(pid, NULL, 0);
+                waitpid(pid, &status,WUNTRACED);
+                if(status == 5247)
+                    ctrl_Z();
+                else if(status == 2)
+                    ctrl_C();
+                tcsetpgrp(STDIN_FILENO,getpid()) ;
             }
 		}
-    }else{ //命令不存在
-        printf("找不到命令 15%s\n", inputBuff);
+    }else{ //脙眉脕卯虏禄麓忙脭脷
+        printf("脮脪虏禄碌陆脙眉脕卯 15%s\n", inputBuff);
+    }
+}
+void execPipe(SimpleCmd *cmd1,SimpleCmd *cmd2)
+{
+    pid_t main,pid;
+    int pipe_fd[2];
+    int pipeIn,pipeOut;
+    char cmdBuff2[40],cmdBuff1[40];
+    if(exists(cmd1->args[0]))
+    {
+        strcpy(cmdBuff1,cmdBuff);
+        if(exists(cmd2->args[0]))
+        {
+    strcpy(cmdBuff2,cmdBuff);
+
+    if((main=fork())<0)
+    {
+        perror("Fork failed");
+        exit(errno);
+    }
+    if(pipe(pipe_fd)<0)
+    {
+        perror("pipe failed");
+        exit(errno);
+    }
+    if(main)
+    {
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
+        waitpid(main,NULL,0);
+        waitpid(pid,NULL,0);
+    }
+    else
+    {
+        if((pid=fork())<0)
+        {
+            perror("pipe failed");
+            exit(errno);
+        }
+        if(pid)
+        {
+            close(pipe_fd[0]);
+            dup2(pipe_fd[1],1);
+            close(pipe_fd[1]);
+            if(cmd1->input != NULL)
+            { 
+                if((pipeIn = open(cmd1->input, O_RDONLY, S_IRUSR|S_IWUSR)) == -1){
+                    printf("can't open the file %s拢隆\n", cmd1->input);
+                    return;
+                }
+                if(dup2(pipeIn, 0) == -1){
+                    printf("Redirecting standard input error拢隆\n");
+                    return;
+                }
+            }            
+            justArgs(cmd1->args[0]);
+            if(execv(cmdBuff1, cmd1->args) < 0){ //脰麓脨脨脙眉脕卯
+                printf("execv failed!\n");
+                return;
+            }
+        }
+        if(!pid)
+        {
+            close(pipe_fd[1]);
+            dup2(pipe_fd[0],0);
+            close(pipe_fd[0]);
+            if(cmd2->output != NULL)
+            { 
+                if((pipeOut = open(cmd2->output, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR)) == -1){
+                    printf("can't open the file %s拢隆\n", cmd2->output);
+                    return ;
+                }
+                if(dup2(pipeOut, 1) == -1){
+                    printf("Redirecting standard input error拢隆\n");
+                    return;
+                }
+            }
+            justArgs(cmd2->args[0]);
+            if(execv(cmdBuff2, cmd2->args) < 0){ //脰麓脨脨脙眉脕卯
+                printf("execv failed!\n");
+                return;
+            }
+        }
+    }
+    }
+    else
+    {
+        printf("can't find the command 15%s\n", inputBuff);
+    }
+
+    }
+    else
+    { 
+        printf("can't find the command 15%s\n", inputBuff);
     }
 }
 
-/*执行命令*/
+/*脰麓脨脨脙眉脕卯*/
 void execSimpleCmd(SimpleCmd *cmd){
     int i, pid;
     char *temp;
     Job *now = NULL;
     
-    if(strcmp(cmd->args[0], "exit") == 0) { //exit命令
+    if(strcmp(cmd->args[0], "exit") == 0) { //exit脙眉脕卯
         exit(0);
-    } else if (strcmp(cmd->args[0], "history") == 0) { //history命令
+    } else if (strcmp(cmd->args[0], "history") == 0) { //history脙眉脕卯
         if(history.end == -1){
-            printf("尚未执行任何命令\n");
+            printf("脡脨脦麓脰麓脨脨脠脦潞脦脙眉脕卯\n");
             return;
         }
         i = history.start;
@@ -551,33 +723,34 @@ void execSimpleCmd(SimpleCmd *cmd){
             printf("%s\n", history.cmds[i]);
             i = (i + 1)%HISTORY_LEN;
         } while(i != (history.end + 1)%HISTORY_LEN);
-    } else if (strcmp(cmd->args[0], "jobs") == 0) { //jobs命令
+    } else if (strcmp(cmd->args[0], "jobs") == 0) { //jobs脙眉脕卯
         if(head == NULL){
-            printf("尚无任何作业\n");
+            printf("脡脨脦脼脠脦潞脦脳梅脪碌\n");
         } else {
             printf("index\tpid\tstate\t\tcommand\n");
             for(i = 1, now = head; now != NULL; now = now->next, i++){
                 printf("%d\t%d\t%s\t\t%s\n", i, now->pid, now->state, now->cmd);
             }
         }
-    } else if (strcmp(cmd->args[0], "cd") == 0) { //cd命令
+    } else if (strcmp(cmd->args[0], "cd") == 0) { //cd脙眉脕卯
         temp = cmd->args[1];
         if(temp != NULL){
             if(chdir(temp) < 0){
-                printf("cd; %s 错误的文件名或文件夹名！\n", temp);
+                printf("cd; %s 麓铆脦贸碌脛脦脛录镁脙没禄貌脦脛录镁录脨脙没拢隆\n", temp);
             }
         }
-    } else if (strcmp(cmd->args[0], "fg") == 0) { //fg命令
+    } else if (strcmp(cmd->args[0], "fg") == 0) { //fg脙眉脕卯
         temp = cmd->args[1];
         if(temp != NULL && temp[0] == '%'){
             pid = str2Pid(temp, 1, strlen(temp));
             if(pid != -1){
+                printf("%d @@\n",head);
                 fg_exec(pid);
             }
         }else{
-            printf("fg; 参数不合法，正确格式为：fg %<int>\n");
+            printf("fg; 虏脦脢媒虏禄潞脧路篓拢卢脮媒脠路赂帽脢陆脦陋拢潞fg %<int>\n");
         }
-    } else if (strcmp(cmd->args[0], "bg") == 0) { //bg命令
+    } else if (strcmp(cmd->args[0], "bg") == 0) { //bg脙眉脕卯
         temp = cmd->args[1];
         if(temp != NULL && temp[0] == '%'){
             pid = str2Pid(temp, 1, strlen(temp));
@@ -587,24 +760,61 @@ void execSimpleCmd(SimpleCmd *cmd){
             }
         }
 		else{
-            printf("bg; 参数不合法，正确格式为：bg %<int>\n");
+            printf("bg; 虏脦脢媒虏禄潞脧路篓拢卢脮媒脠路赂帽脢陆脦陋拢潞bg %<int>\n");
         }
-    } else{ //外部命令
+    } 
+    else if (strcmp(cmd->args[0], "echo") == 0){
+            int j = 1;
+            printf("@@");
+            while(cmd->args[j] != NULL){
+                printf("%s ",cmd->args[j]);
+                j++;
+            }
+            printf("\n");
+    }
+    else if(strcmp(cmd->args[0], "pwd") == 0){
+            printf("@@%s\n", get_current_dir_name());
+    }
+    else if(strcmp(cmd->args[0], "mkdir") == 0){
+            if(cmd->args[1] != NULL){
+                if(mkdir(cmd->args[1],S_IRWXO|S_IRWXG|S_IRWXU )<0)
+                {
+                    printf("create file %s failure!\n",cmd->args[1]);
+                    //exit(EXIT_FAILURE);
+                }   
+                else
+                {
+                     printf("create file %s success!\n",cmd->args[1]);
+                }
+            }
+            else{
+                printf("there is no file name\n");
+            }
+    }
+    else{ //脥芒虏驴脙眉脕卯
         execOuterCmd(cmd);
     }
     
-    //释放结构体空间
+    //脢脥路脜陆谩鹿鹿脤氓驴脮录盲
     for(i = 0; cmd->args[i] != NULL; i++){
         free(cmd->args[i]);
         free(cmd->input);
         free(cmd->output);
+        //free(cmd);
     }
+    free(cmd);
 }
 
 /*******************************************************
-                     命令执行接口
+                     脙眉脕卯脰麓脨脨陆脫驴脷
 ********************************************************/
 void execute(){
     SimpleCmd *cmd = handleSimpleCmdStr(0, strlen(inputBuff));
-    execSimpleCmd(cmd);
+    if(cmd->pipe)
+    {
+        SimpleCmd *cmd2=handleSimpleCmdStr(cmd->index, strlen(inputBuff));
+        execPipe(cmd,cmd2);
+    }
+    else
+        execSimpleCmd(cmd);
 }

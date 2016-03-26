@@ -7,7 +7,7 @@
     int offset, len, commandDone;
 %}
 
-%token STRING
+%token STRING PIPE
 
 %%
 line            :   /* empty */
@@ -16,12 +16,18 @@ line            :   /* empty */
 
 command         :   fgCommand
                     |fgCommand '&'
+		    |pipeCommand
 ;
 
 fgCommand       :   simpleCmd
 ;
 
 simpleCmd       :   progInvocation inputRedirect outputRedirect
+;
+pipeCommand     :   progInvocation inputRedirect pipe outputRedirect
+;
+pipe            :    /*  empty  */
+		    |PIPE progInvocation
 ;
 
 progInvocation  :   STRING args
@@ -39,23 +45,24 @@ args            :   /* empty */
                     |args STRING
 ;
 
+
 %%
 
 /****************************************************************
-                  ´Ê·¨·ÖÎöº¯Êý
+                  ?Ê·?????????
 ****************************************************************/
-int yylex(){
-    //Õâ¸öº¯ÊýÓÃÀ´¼ì²éinputBuffÊÇ·ñÂú×ãlexµÄ¶¨Òå£¬Êµ¼ÊÉÏ²¢²»½øÐÐÈÎºÎ²Ù×÷£¬³õÆÚ¿ÉÂÔ¹ý²»¿´
+/*int yylex(){
+    //????????????????inputBuff?Ç·?????lex?Ä¶??å£¬Êµ???Ï²????????ÎºÎ²????????Ú¿??Ô¹?????
     int flag;
     char c;
     
-	//Ìø¹ý¿Õ¸ñµÈÎÞÓÃÐÅÏ¢
+	//?????Õ¸?????????Ï¢
     while(offset < len && (inputBuff[offset] == ' ' || inputBuff[offset] == '\t')){ 
         offset++;
     }
     
     flag = 0;
-    while(offset < len){ //Ñ­»·½øÐÐ´Ê·¨·ÖÎö£¬·µ»ØÖÕ½á·û
+    while(offset < len){ //Ñ­?????Ð´Ê·????????????Õ½???
         c = inputBuff[offset];
         
         if(c == ' ' || c == '\t'){
@@ -81,46 +88,47 @@ int yylex(){
     }else{
         return 0;
     }
-}
+}*/
 
 /****************************************************************
-                  ´íÎóÐÅÏ¢Ö´ÐÐº¯Êý
+                  ??????Ï¢Ö´?Ðº???
 ****************************************************************/
 void yyerror()
 {
-    printf("ÄãÊäÈëµÄÃüÁî²»ÕýÈ·£¬ÇëÖØÐÂÊäÈë£¡\n");
+    printf("your command is incorrector, please retry\n");
 }
 
 /****************************************************************
-                  mainÖ÷º¯Êý
+                  main??????
 ****************************************************************/
 int main(int argc, char** argv) {
     int i;
     char c;
 
-    init(); //³õÊ¼»¯»·¾³
+    init(); //??Ê¼??????
     commandDone = 0;
     
-    printf("yourname@computer:%s$ ", get_current_dir_name()); //´òÓ¡ÌáÊ¾·ûÐÅÏ¢
+    printf("Saber@computer:%s$ ", get_current_dir_name()); //??Ó¡??Ê¾????Ï¢
 
     while(1){
         i = 0;
-        while((c = getchar()) != '\n'){ //¶ÁÈëÒ»ÐÐÃüÁî
-            inputBuff[i++] = c;
+        while((c = getchar()) != '\n' ){ //????Ò»??????
+            if(c != EOF)
+                inputBuff[i++] = c;
         }
         inputBuff[i] = '\0';
 
         len = i;
         offset = 0;
-        
-        yyparse(); //µ÷ÓÃÓï·¨·ÖÎöº¯Êý£¬¸Ãº¯ÊýÓÉyylex()Ìá¹©µ±Ç°ÊäÈëµÄµ¥´Ê·ûºÅ
+        yy_switch_to_buffer(yy_scan_string(inputBuff));
+        yyparse(); //?????ï·¨???????????Ãº?????yylex()?á¹©??Ç°?????Äµ??Ê·???
 
-        if(commandDone == 1){ //ÃüÁîÒÑ¾­Ö´ÐÐÍê³Éºó£¬Ìí¼ÓÀúÊ·¼ÇÂ¼ÐÅÏ¢
+        if(commandDone == 1){ //?????Ñ¾?Ö´?????Éº?????????Ê·??Â¼??Ï¢
             commandDone = 0;
             addHistory(inputBuff);
         }
         
-        printf("yourname@computer:%s$ ", get_current_dir_name()); //´òÓ¡ÌáÊ¾·ûÐÅÏ¢
+        printf("Saber@computer:%s$ ", get_current_dir_name()); //??Ó¡??Ê¾????Ï¢
      }
 
     return (EXIT_SUCCESS);
